@@ -3,8 +3,8 @@ import { AppState, InheritorInfo } from "../reducers";
 import * as borsh from 'borsh';
 
 const ProgramID = new PublicKey("Go6e2SgC9feLQBruwtPzN69rDkmiFCKYERztJMU6Pa43");
-// const RPC = "http://127.0.0.1:8899";
-const RPC = "https://api.devnet.solana.com";
+const RPC = "http://127.0.0.1:8899";
+// const RPC = "https://api.devnet.solana.com";
 const WILL_SEED = "solana-will.com/my/v3/1";
 const connection = new Connection(RPC);
 
@@ -61,13 +61,13 @@ const WithdrawSolMessageSchema = new Map([
 ]);
 
 class WillAccount {
-    withdraw_allowed_ts: number = 0;
+    withdraw_allowed_ts: Date;
     inheritors_names: string[] = [];
     inheritors_pubkeys: string[] = [];
     inheritors_shares: number[] = [];
 
-    constructor(fields: {withdraw_allowed_ts: number, inheritors_names: string[], inheritors_pubkeys: string[], inheritors_shares: number[]}) {
-        this.withdraw_allowed_ts = fields.withdraw_allowed_ts;
+    constructor(fields: {withdraw_allowed_ts: any, inheritors_names: string[], inheritors_pubkeys: string[], inheritors_shares: number[]}) {
+        this.withdraw_allowed_ts = new Date(1000 * (1610612736 + fields.withdraw_allowed_ts.words[0]));
         this.inheritors_names = fields.inheritors_names;
         this.inheritors_pubkeys = fields.inheritors_pubkeys;
         this.inheritors_shares = fields.inheritors_shares;
@@ -83,6 +83,10 @@ class WillAccount {
             result.push(ii);
         }
         return result;
+    }
+
+    get_release_date(): Date {
+        return this.withdraw_allowed_ts;
     }
 }
 
@@ -116,6 +120,7 @@ export const connectPhantomWallet = () => {
                         console.log("Deserializing", acc.data);
                         const will_account = borsh.deserializeUnchecked(WillSchema, WillAccount, acc.data) as WillAccount;
                         dispatch({ type: "SET_INHERITORS", payload: will_account.get_inheritors() });
+                        dispatch({ type: "SET_RELEASE_DATE", payload: will_account.get_release_date() });
                         dispatch({ type: "FETCHED_WILL_SOL_BALANCE", payload: 1.0 * acc.lamports / LAMPORTS_PER_SOL });
                         dispatch({ type: "ALREADY_HAS_A_WILL", payload: true });
                     } else {
@@ -248,7 +253,7 @@ export const depositSol = (fromPubkey: PublicKey, toPubkey: PublicKey, amount: n
 };
 
 export const withdrawSol = (publicKey: PublicKey, willAccount: PublicKey, amount: number, currentSolAmount: number) => (dispatch: any) => {
-    const msg = new WithdrawSolMessage(1, amount);
+    const msg = new WithdrawSolMessage(1, amount * LAMPORTS_PER_SOL);
     const serializedMsg = borsh.serialize(WithdrawSolMessageSchema, msg);
     const instruction = new TransactionInstruction({
         keys: [
@@ -276,6 +281,9 @@ export const withdrawSol = (publicKey: PublicKey, willAccount: PublicKey, amount
         });
 };
 
+export const refresh = (publicKey: PublicKey, willAccount: PublicKey, currentSolAmount: number) => {
+    return withdrawSol(publicKey, willAccount, 0.000001, currentSolAmount);
+};
 
 export const receiveInheritance = (publicKey: PublicKey | null, claimedWillPublicKey: PublicKey | null) => (dispatch: any) => {
     if (!publicKey) {

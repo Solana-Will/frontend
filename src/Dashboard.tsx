@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { AppState, InheritorInfo } from './reducers/index';
-import { addInheritor, removeInheritor, changeInheritorName, changeInheritorWallet, changeInheritorShare, saveWill, showDepositTokensSelector, showWithdrawTokensSelector } from './actions/main-page-actions';
+import { addInheritor, removeInheritor, changeInheritorName, changeInheritorWallet, changeInheritorShare, saveWill, showDepositTokensSelector, showWithdrawTokensSelector, refresh } from './actions/main-page-actions';
 import { Pie } from 'react-chartjs-2';
 import TokenTransferDialog from './TokenTransferDialog';
 
@@ -83,10 +83,10 @@ const Dashboard = (props: any) => {
                         <img src="img/share.svg" />
                         Share
                     </div> */}
-                    <div>
+                    {/* <div>
                         <img src="delete.svg" />
                         Delete
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </section>
@@ -96,13 +96,13 @@ const Dashboard = (props: any) => {
                     <div className="table">
                         <div className="head">
                             <div>Will ID</div>
-                            {/* <div>Notary wallet</div> */}
-                            {/* <div>NFT</div> */}
+                            <div></div>
+                            <div>Release date</div>
                         </div>
                         <div className="content">
                             <div>{props.willAccount.toString()}</div>
-                            {/* <div>0x3A13...e4bc</div> */}
-                            {/* <div>8</div> */}
+                            <div></div>
+                            <div>{props.releaseDate.toLocaleString()}</div>
                         </div>
                         <div className="button">
                             <div className="item">
@@ -111,9 +111,9 @@ const Dashboard = (props: any) => {
                             <div className="item">
                                 <div onClick={props.showWithdrawTokensSelector}>Withdraw</div>
                             </div>
-                            {/* <div className="item">
-                                <div>View</div>
-                            </div> */}
+                            <div className="item">
+                                <div onClick={() => props.refresh(props.pubkey, props.willAccount, props.willSolBalance)}>Refresh</div>
+                            </div>
                         </div>
                         <div className="line"></div>
                         <div className="head_with_icon">
@@ -158,9 +158,9 @@ const Dashboard = (props: any) => {
                         return (
                             <div className="body" key={index}>
                                 <div>{index + 1}</div>
-                                <div><input value={e.name} type="text" onChange={props.changeInheritorName} data-index={index} /></div>
-                                <div><input value={e.pubkey} type="text" onChange={props.changeInheritorWallet} data-index={index} /></div>
-                                <div><input value={e.share} type="text" size={3} onChange={props.changeInheritorShare} data-index={index} /></div>
+                                <div><input value={e.name} type="text" onChange={props.changeInheritorName} data-index={index} className="will-text-entry" /></div>
+                                <div><input value={e.pubkey} type="text" onChange={props.changeInheritorWallet} data-index={index} className="will-text-entry" /></div>
+                                <div><input value={e.share} type="text" size={3} onChange={props.changeInheritorShare} data-index={index} className="will-text-entry" /></div>
                                 <div>$ {(sharePrice * e.share).toFixed(2)}</div>
                                 {/* <div className="button">
                                 <div>
@@ -180,6 +180,7 @@ const Dashboard = (props: any) => {
 
             </div>
         </section>
+        {props.shouldShowDepositTokensDialog || props.shouldShowWithdrawTokensDialog ? <TokenTransferDialog/> : <></>}
     </>
     );
 };
@@ -190,11 +191,12 @@ const mapStateToProps = (state: AppState) => ({
     willAccount: state.willPublicKey,
     willSolBalance: state.willSolBalance,
     totalBalance: state.totalBalance,
+    releaseDate: state.releaseDate,
     shouldShowDepositTokensDialog: state.shouldShowDepositTokensDialog,
     shouldShowWithdrawTokensDialog: state.shouldShowWithdrawTokensDialog,
 });
 export default connect(mapStateToProps, {
     addInheritor, removeInheritor, changeInheritorName, saveWill,
     changeInheritorWallet, changeInheritorShare,
-    showWithdrawTokensSelector, showDepositTokensSelector
+    showWithdrawTokensSelector, showDepositTokensSelector, refresh,
 })(Dashboard);

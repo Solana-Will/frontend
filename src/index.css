@@ -1112,3 +1112,9 @@ body.des_13 .bl_1_1 .right_info div:nth-child(2){
 	border-radius: 4px;
 	color: #FFFFFF;
 }
+
+.will-text-entry {
+	border: 1px solid rgba(0,0,0,0.1);
+	padding: 2px 4px;
+	border-radius: 2px;
+}

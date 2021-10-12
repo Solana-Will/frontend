@@ -24,6 +24,7 @@ export interface AppState {
   totalBalance: number;
   shouldShowDepositTokensDialog: boolean;
   shouldShowWithdrawTokensDialog: boolean;
+  releaseDate: Date | null;
 };
 
 const initialState = {
@@ -42,6 +43,7 @@ const initialState = {
   totalBalance: 0.0,
   shouldShowDepositTokensDialog: false,
   shouldShowWithdrawTokensDialog: false,
+  releaseDate: null,
 };
 
 const solanaWillAppReducer = (
@@ -120,6 +122,8 @@ const solanaWillAppReducer = (
     case 'SET_INHERITORS': {
       return { ...state, inheritors: action.payload };
     }
+    case 'SET_RELEASE_DATE':
+      return { ...state, releaseDate: action.payload };
     case 'HIDE_TRANSFER_DIALOG_SELECTOR':
       return { ...state, shouldShowDepositTokensDialog: false, shouldShowWithdrawTokensDialog: false };
     case 'SHOW_DEPOSIT_TOKENS_DIALOG_SELECTOR':
