@@ -4,11 +4,13 @@ import Main from './Main';
 import { connect } from 'react-redux';
 import { AppState } from './reducers/index';
 import Dashboard from './Dashboard';
+import ReceivedInheritance from './ReceivedInheritance';
 
 const App = (props: any) => {
   switch (props.view) {
     case 'MAIN': return (<Main />);
     case 'DASHBOARD': return (<Dashboard/>);
+    case 'RECEIVED_INHERITANCE': return (<ReceivedInheritance/>);
   }
   return (
     <div className="App">Router Error: Unknown View</div>

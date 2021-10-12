@@ -15,6 +15,7 @@ export interface AppState {
   fetchedBalance: boolean;
   pubkey: PublicKey | null;
   willPublicKey: PublicKey | null;
+  claimedWillPublicKey: PublicKey | null;
   willCreated: boolean;
   actionAfterWalletConnected: CallableFunction | null;
   inheritors: InheritorInfo[];
@@ -32,6 +33,7 @@ const initialState = {
   fetchedBalance: false,
   pubkey: null,
   willPublicKey: null,
+  claimedWillPublicKey: null,
   willCreated: false,
   actionAfterWalletConnected: null,
   inheritors: [],
@@ -66,6 +68,8 @@ const solanaWillAppReducer = (
       return { ...state, willSolBalance: action.payload, totalBalance: action.payload * state.usdPerSol };
     case 'NAVIGATE_TO_DASHBOARD':
       return { ...state, view: 'DASHBOARD' };
+    case 'NAVIGATE_TO_RECEIVED_INHERITANCE':
+      return { ...state, view: 'RECEIVED_INHERITANCE' };
     case 'NO_WILL_YET': {
       const nextAction = state.actionAfterWalletConnected;
       nextAction && window.setTimeout(() => nextAction(state), 0);

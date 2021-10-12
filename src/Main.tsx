@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { showWalletSelector, hideWalletSelector, createWill, navigateToDashboard } from './actions/main-page-actions';
+import { showWalletSelector, hideWalletSelector, createWill, navigateToDashboard, receiveInheritance } from './actions/main-page-actions';
 import { connect } from 'react-redux';
 import { AppState } from './reducers/index';
 import WalletSelector from './WalletSelector';
@@ -42,14 +42,14 @@ const Main = (props: any) => {
                     </div>
                 </div>
                 <div className="bl_1_2">
-                    <h1>CRYPTO WILL</h1>
+                    <h1>SOLANA WILL</h1>
                     <div className="description">
                         You can leave your crypto and NFTs as an inheritance to multiple<br /> recipients. Assets are transferrable when you do<br /> not visit this page for 365 days. Fund your probate<br /> account and add recipients.
                     </div>
                     <div className="two_button">
                         <div onClick={(props.walletIsConnected && props.isWillCreated) ? props.navigateToDashboard : (() => props.createWill(props.pubkey, props.willPublicKey))}
                         >{(props.walletIsConnected && props.isWillCreated) ? 'Manage' : 'Create'} a WILL</div>
-                        <div>Claim an inheritance</div>
+                        <div onClick={() => props.receiveInheritance(props.pubkey, props.claimedWillPublicKey)}>Claim an inheritance</div>
                     </div>
                 </div>
             </div>
@@ -66,5 +66,6 @@ const mapStateToProps = (state: AppState) => ({
     pubkey: state.pubkey,
     isWillCreated: state.willCreated,
     willPublicKey: state.willPublicKey,
+    claimedWillPublicKey: state.claimedWillPublicKey,
 });
-export default connect(mapStateToProps, { showWalletSelector, hideWalletSelector, createWill, navigateToDashboard })(Main);
+export default connect(mapStateToProps, { showWalletSelector, hideWalletSelector, createWill, navigateToDashboard, receiveInheritance })(Main);

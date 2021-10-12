@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { AppState } from './reducers/index';
-import { hideTransferTokensSelector, depositSol } from './actions/main-page-actions';
+import { hideTransferTokensSelector, depositSol, withdrawSol } from './actions/main-page-actions';
 
 const TokenTransferDialog = (props: any) => {
 	return (<>
@@ -19,7 +19,7 @@ const TokenTransferDialog = (props: any) => {
 			 	onClick={
 					 props.shouldShowDepositTokensDialog
 					 ? () => props.depositSol(props.pubkey, props.willPublicKey, parseFloat((document.getElementById("TokenTransferDialog--amount") as HTMLInputElement).value || '0'), props.willSolBalance)
-					 : () => null}>
+					 : () => props.withdrawSol(props.pubkey, props.willPublicKey, parseFloat((document.getElementById("TokenTransferDialog--amount") as HTMLInputElement).value || '0'), props.willSolBalance)}>
 				{props.shouldShowDepositTokensDialog ? 'Deposit' : 'Withdraw'}
 			</div>
 		</div>
@@ -33,4 +33,4 @@ const mapStateToProps = (state: AppState) => ({
 	willSolBalance: state.willSolBalance,
 });
 
-export default connect(mapStateToProps, { hideTransferTokensSelector, depositSol })(TokenTransferDialog);
+export default connect(mapStateToProps, { hideTransferTokensSelector, depositSol, withdrawSol })(TokenTransferDialog);

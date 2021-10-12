@@ -3,8 +3,9 @@ import { AppState, InheritorInfo } from "../reducers";
 import * as borsh from 'borsh';
 
 const ProgramID = new PublicKey("Go6e2SgC9feLQBruwtPzN69rDkmiFCKYERztJMU6Pa43");
-const RPC = "http://127.0.0.1:8899";
-const WILL_SEED = "solana-will.com/my/v2/1";
+// const RPC = "http://127.0.0.1:8899";
+const RPC = "https://api.devnet.solana.com";
+const WILL_SEED = "solana-will.com/my/v3/1";
 const connection = new Connection(RPC);
 
 
@@ -46,6 +47,19 @@ const SetInheritorInfosSchema = new Map([
     }]
 ]);
 
+class WithdrawSolMessage {
+    constructor(public selector = 0, public lamports = 0) {}
+}
+
+const WithdrawSolMessageSchema = new Map([
+    [WithdrawSolMessage, {
+        kind: 'struct', fields: [
+            ['selector', 'u8'],
+            ['lamports', 'u64'],
+        ]
+    }]
+]);
+
 class WillAccount {
     withdraw_allowed_ts: number = 0;
     inheritors_names: string[] = [];
@@ -76,6 +90,7 @@ class WillAccount {
 const WillSchema = new Map([
     [WillAccount, {
         kind: 'struct', fields: [
+            ['schema_version', 'u8'],
             ['withdraw_allowed_ts', 'u64'],
             ['inheritors_names', ['string']],
             ['inheritors_pubkeys', ['string']],
@@ -171,6 +186,7 @@ export const createWill = (wallet: PublicKey | null, willKey: PublicKey) => {
 };
 
 export const navigateToDashboard = () => ({ type: 'NAVIGATE_TO_DASHBOARD' });
+export const navigateToReceivedInheritance = () => ({ type: 'NAVIGATE_TO_RECEIVED_INHERITANCE' });
 
 export const addInheritor = () => ({ type: 'ADD_INHERITOR' });
 export const removeInheritor = (e: MouseEvent) => ({ type: 'REMOVE_INHERITOR', payload: parseInt((e.target as HTMLDivElement).dataset.index || '-1') });
@@ -181,7 +197,6 @@ export const changeInheritorShare = (e: MouseEvent) => ({ type: 'CHANGE_INHERITO
 export const saveWill = (publicKey: PublicKey, willAccount: PublicKey, inheritors: InheritorInfo[]) => (dispatch: any) => {
     const msg = SetInheritorInfosMessage.fromInheritorInfo(inheritors);
     const serializedMsg = borsh.serialize(SetInheritorInfosSchema, msg);
-    console.log("Sending", serializedMsg);
     const instruction = new TransactionInstruction({
         keys: [
             { pubkey: publicKey, isSigner: true, isWritable: false },
@@ -190,17 +205,19 @@ export const saveWill = (publicKey: PublicKey, willAccount: PublicKey, inheritor
         programId: ProgramID,
         data: Buffer.from(serializedMsg),
     });
-    connection.getRecentBlockhash().then(
-        bh => {
+    connection.getRecentBlockhash()
+        .then(bh => {
             const transaction = new Transaction({
                 feePayer: publicKey,
                 recentBlockhash: bh.blockhash,
             });
             transaction.add(instruction);
-            (window as any).solana.signTransaction(transaction).then(
-                (signedTransaction: any) => connection.sendRawTransaction(signedTransaction.serialize())
-            ).then(() => dispatch({ type: 'WILL_SAVED' }));
-        });
+            return (window as any).solana.signTransaction(transaction)
+        })
+        .then((signedTransaction: any) =>
+            connection.sendRawTransaction(signedTransaction.serialize())
+        )
+        .then(() => dispatch({ type: 'WILL_SAVED' }));
 };
 
 export const hideTransferTokensSelector = () => ({ type: 'HIDE_TRANSFER_DIALOG_SELECTOR' });
@@ -228,5 +245,83 @@ export const depositSol = (fromPubkey: PublicKey, toPubkey: PublicKey, amount: n
         dispatch({ type: "FETCHED_WILL_SOL_BALANCE", payload: currentSolAmount + amount });
         dispatch(hideTransferTokensSelector());
     });
+};
 
+export const withdrawSol = (publicKey: PublicKey, willAccount: PublicKey, amount: number, currentSolAmount: number) => (dispatch: any) => {
+    const msg = new WithdrawSolMessage(1, amount);
+    const serializedMsg = borsh.serialize(WithdrawSolMessageSchema, msg);
+    const instruction = new TransactionInstruction({
+        keys: [
+            { pubkey: publicKey, isSigner: true, isWritable: true },
+            { pubkey: willAccount, isSigner: false, isWritable: true },
+        ],
+        programId: ProgramID,
+        data: Buffer.from(serializedMsg),
+    });
+    connection.getRecentBlockhash()
+        .then(bh => {
+            const transaction = new Transaction({
+                feePayer: publicKey,
+                recentBlockhash: bh.blockhash,
+            });
+            transaction.add(instruction);
+            return (window as any).solana.signTransaction(transaction)
+        })
+        .then((signedTransaction: any) =>
+            connection.sendRawTransaction(signedTransaction.serialize())
+        )
+        .then(() => {
+            dispatch({ type: "FETCHED_WILL_SOL_BALANCE", payload: currentSolAmount - amount });
+            dispatch(hideTransferTokensSelector());
+        });
+};
+
+
+export const receiveInheritance = (publicKey: PublicKey | null, claimedWillPublicKey: PublicKey | null) => (dispatch: any) => {
+    if (!publicKey) {
+        dispatch({
+            type: 'SHOW_WALLET_SELECTOR',
+            payload: (newState: AppState) => {
+                console.log("Running receiveInheritance() after wallet is connected", newState);
+                if (!newState.pubkey) {
+                    console.error("Something went wrong, pubkey is not known after wallet is connected");
+                    return;
+                }
+                receiveInheritance(newState.pubkey, newState.claimedWillPublicKey)(dispatch);
+            }
+        });
+        return;
+    }
+    if (!claimedWillPublicKey) {
+        const claimedWillPublicKeyEntry = prompt("Enter the public key of a will");
+        if (claimedWillPublicKeyEntry) {
+            claimedWillPublicKey = new PublicKey(claimedWillPublicKeyEntry);
+        } else {
+            return;
+        }
+    }
+    const msg = Buffer.alloc(1, 2);
+    const instruction = new TransactionInstruction({
+        keys: [
+            { pubkey: publicKey, isSigner: true, isWritable: true },
+            { pubkey: claimedWillPublicKey, isSigner: false, isWritable: true },
+        ],
+        programId: ProgramID,
+        data: msg
+    });
+    connection.getRecentBlockhash()
+        .then(bh => {
+            const transaction = new Transaction({
+                feePayer: publicKey,
+                recentBlockhash: bh.blockhash,
+            });
+            transaction.add(instruction);
+            return (window as any).solana.signTransaction(transaction)
+        })
+        .then((signedTransaction: any) =>
+            connection.sendRawTransaction(signedTransaction.serialize())
+        )
+        .then(() => {
+            dispatch(navigateToReceivedInheritance());
+        });
 };

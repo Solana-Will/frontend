@@ -37,8 +37,8 @@ const Dashboard = (props: any) => {
         ],
     };
 
-    let sharePrice = props.totalBalance / props.inheritors.reduce((acc: number, val: InheritorInfo)=>(acc + val.share), 0);
-    console.debug('sharePrice', sharePrice, 'shares', props.inheritors.reduce((acc: number, val: InheritorInfo)=>(acc + val.share), 0));
+    let sharePrice = props.totalBalance / props.inheritors.reduce((acc: number, val: InheritorInfo) => (acc + val.share), 0);
+    console.debug('sharePrice', sharePrice, 'shares', props.inheritors.reduce((acc: number, val: InheritorInfo) => (acc + val.share), 0));
 
     return (<>
         <section className="block_1">
@@ -149,7 +149,7 @@ const Dashboard = (props: any) => {
                         <div>#</div>
                         <div>Name</div>
                         <div>Wallet</div>
-                        <div>%</div>
+                        <div>Shares</div>
                         <div>Amount, $</div>
                         {/* <div>NFT</div> */}
                         <div></div>
@@ -160,7 +160,7 @@ const Dashboard = (props: any) => {
                                 <div>{index + 1}</div>
                                 <div><input value={e.name} type="text" onChange={props.changeInheritorName} data-index={index} /></div>
                                 <div><input value={e.pubkey} type="text" onChange={props.changeInheritorWallet} data-index={index} /></div>
-                                <div><input value={e.share} type="text" size={3} onChange={props.changeInheritorShare} data-index={index} />%</div>
+                                <div><input value={e.share} type="text" size={3} onChange={props.changeInheritorShare} data-index={index} /></div>
                                 <div>$ {(sharePrice * e.share).toFixed(2)}</div>
                                 {/* <div className="button">
                                 <div>
@@ -180,8 +180,7 @@ const Dashboard = (props: any) => {
 
             </div>
         </section>
-        {(props.shouldShowDepositTokensDialog || props.shouldShowWithdrawTokensDialog) ?
-            <TokenTransferDialog /> : props.toString()}</>
+    </>
     );
 };
 
