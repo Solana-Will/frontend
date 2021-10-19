@@ -4,6 +4,7 @@ import { AppState, InheritorInfo } from './reducers/index';
 import { addInheritor, removeInheritor, changeInheritorName, changeInheritorWallet, changeInheritorShare, saveWill, showDepositTokensSelector, showWithdrawTokensSelector, refresh } from './actions/main-page-actions';
 import { Pie } from 'react-chartjs-2';
 import TokenTransferDialog from './TokenTransferDialog';
+import Header from './Header';
 
 const Dashboard = (props: any) => {
     useEffect(() => {
@@ -43,26 +44,7 @@ const Dashboard = (props: any) => {
     return (<>
         <section className="block_1">
             <div className="container">
-                <div className="bl_1_1">
-                    <nav>
-                        <ul>
-                            <li><a href="#">About company</a></li>
-                            <li><a href="#">Аbout the project</a></li>
-                            <li><a href="#">FAQ</a></li>
-                            <li><a href="#">Contacts</a></li>
-                        </ul>
-                    </nav>
-                    <div className="right_info">
-                        {/* <div>
-                            <span>00</span> SOL
-                            <img src="icon.svg" />
-                        </div> */}
-                        <div>
-                            <span>{props.pubkey.toString()}</span>
-                            <img src="cryp.svg" />
-                        </div>
-                    </div>
-                </div>
+                <Header />
             </div>
         </section>
         <section className="block_2">
@@ -180,7 +162,7 @@ const Dashboard = (props: any) => {
 
             </div>
         </section>
-        {props.shouldShowDepositTokensDialog || props.shouldShowWithdrawTokensDialog ? <TokenTransferDialog/> : <></>}
+        {props.shouldShowDepositTokensDialog || props.shouldShowWithdrawTokensDialog ? <TokenTransferDialog /> : <></>}
     </>
     );
 };

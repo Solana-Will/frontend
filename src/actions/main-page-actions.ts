@@ -3,8 +3,8 @@ import { AppState, InheritorInfo } from "../reducers";
 import * as borsh from 'borsh';
 
 const ProgramID = new PublicKey("Go6e2SgC9feLQBruwtPzN69rDkmiFCKYERztJMU6Pa43");
-// const RPC = "http://127.0.0.1:8899";
-const RPC = "https://api.devnet.solana.com";
+const RPC = "http://127.0.0.1:8899";
+// const RPC = "https://api.devnet.solana.com";
 const WILL_SEED = "solana-will.com/my/v3/1";
 const connection = new Connection(RPC);
 
@@ -190,6 +190,9 @@ export const createWill = (wallet: PublicKey | null, willKey: PublicKey) => {
     }
 };
 
+export const navigateToMain = () => ({ type: 'NAVIGATE_TO_MAIN' });
+export const navigateToAboutProject = () => ({ type: 'NAVIGATE_TO_ABOUT_PROJECT' });
+export const navigateToContact = () => ({ type: 'NAVIGATE_TO_CONTACTS' });
 export const navigateToDashboard = () => ({ type: 'NAVIGATE_TO_DASHBOARD' });
 export const navigateToReceivedInheritance = () => ({ type: 'NAVIGATE_TO_RECEIVED_INHERITANCE' });
 

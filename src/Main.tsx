@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
-import { showWalletSelector, hideWalletSelector, createWill, navigateToDashboard, receiveInheritance } from './actions/main-page-actions';
+import { hideWalletSelector, createWill, navigateToDashboard, receiveInheritance } from './actions/main-page-actions';
 import { connect } from 'react-redux';
 import { AppState } from './reducers/index';
 import WalletSelector from './WalletSelector';
+import Header from './Header';
 
 const Main = (props: any) => {
     useEffect(() => {
@@ -10,37 +11,10 @@ const Main = (props: any) => {
     });
     console.log(props);
     return (
-        <><section className="block_1">
+        <>
+        <section className="block_1">
             <div className="container">
-                <div className="bl_1_1">
-                    <nav>
-                        <ul>
-                            <li><a href="#">About company</a></li>
-                            <li><a href="#">Аbout the project</a></li>
-                            <li><a href="#">FAQ</a></li>
-                            <li><a href="#">Contacts</a></li>
-                        </ul>
-                    </nav>
-                    <div className="right_info">
-                        {!props.walletIsConnected && <>
-                            <div className="connect" onClick={props.showWalletSelector}>
-                                Connect Wallet
-                            </div>
-                        </>}
-                        {props.fetchedBalance && <>
-                            <div>
-                                <span>00</span> SOL
-                                <img src="./icon.svg" />
-                            </div>
-                        </>}
-                        {props.walletIsConnected && <>
-                            <div>
-                                <span>{props.pubkey.toString()}</span>
-                                <img src="./cryp.svg" />
-                            </div>
-                        </>}
-                    </div>
-                </div>
+                <Header/>
                 <div className="bl_1_2">
                     <h1>SOLANA WILL</h1>
                     <div className="description">
@@ -68,4 +42,4 @@ const mapStateToProps = (state: AppState) => ({
     willPublicKey: state.willPublicKey,
     claimedWillPublicKey: state.claimedWillPublicKey,
 });
-export default connect(mapStateToProps, { showWalletSelector, hideWalletSelector, createWill, navigateToDashboard, receiveInheritance })(Main);
+export default connect(mapStateToProps, { hideWalletSelector, createWill, navigateToDashboard, receiveInheritance })(Main);

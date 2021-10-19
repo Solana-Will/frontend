@@ -68,6 +68,12 @@ const solanaWillAppReducer = (
     }
     case 'FETCHED_WILL_SOL_BALANCE':
       return { ...state, willSolBalance: action.payload, totalBalance: action.payload * state.usdPerSol };
+    case 'NAVIGATE_TO_MAIN':
+      return { ...state, view: 'MAIN' };
+    case 'NAVIGATE_TO_ABOUT_PROJECT':
+      return { ...state, view: 'ABOUT_PROJECT' };
+    case 'NAVIGATE_TO_CONTACTS':
+      return { ...state, view: 'CONTACTS' };
     case 'NAVIGATE_TO_DASHBOARD':
       return { ...state, view: 'DASHBOARD' };
     case 'NAVIGATE_TO_RECEIVED_INHERITANCE':
